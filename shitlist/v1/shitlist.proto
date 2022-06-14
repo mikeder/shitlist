@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package shitlist.v1;
+
+option go_package = "shitlist/gen/shitlist/v1;shitlistv1";
+
+message ShitlistRequest {
+  string name = 1;
+}
+
+message ShitlistResponse {
+  string greeting = 1;
+}
+
+service ShitlistService {
+  rpc Shitlist(ShitlistRequest) returns (ShitlistResponse) {}
+}
+
