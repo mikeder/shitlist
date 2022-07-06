@@ -1,3 +1,5 @@
+# buf.work.yaml defines a workspace so modules can coexist
+# https://docs.buf.build/configuration/v1/buf-work-yaml
 version: v1
 directories:
   - proto

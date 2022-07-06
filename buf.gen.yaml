@@ -1,3 +1,5 @@
+# buf.gen.yaml defines a local generation template used by `buf generate`
+# https://docs.buf.build/configuration/v1/buf-gen-yaml
 version: v1
 plugins:
   - name: go
