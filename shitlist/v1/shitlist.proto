@@ -2,17 +2,17 @@ syntax = "proto3";
 
 package shitlist.v1;
 
-option go_package = "shitlist/gen/shitlist/v1;shitlistv1";
+option go_package = "github.com/mikeder/shitlist/pkg/go/shitlist/v1;shitlistv1";
 
-message ShitlistRequest {
+message GreetRequest {
   string name = 1;
 }
 
-message ShitlistResponse {
+message GreetResponse {
   string greeting = 1;
 }
 
 service ShitlistService {
-  rpc Shitlist(ShitlistRequest) returns (ShitlistResponse) {}
+  rpc Greet(GreetRequest) returns (GreetResponse) {}
 }
 
