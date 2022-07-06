@@ -2,15 +2,12 @@ package handlers
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"text/template"
-	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -28,21 +25,21 @@ var googleOauthConfig = &oauth2.Config{
 const oauthGoogleUrlAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
 
 func OauthGoogleLogin(w http.ResponseWriter, r *http.Request) {
-
 	// Create oauthState cookie
-	oauthState := generateStateOauthCookie(w)
+	oauthState := setOauthStateCookie(w)
 
-	/*
-		AuthCodeURL receive state that is a token to protect the user from CSRF attacks. You must always provide a non-empty string and
-		validate that it matches the the state query parameter on your redirect callback.
-	*/
 	u := googleOauthConfig.AuthCodeURL(oauthState)
 	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
 }
 
 func OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// Read oauthState from Cookie
-	oauthState, _ := r.Cookie("oauthstate")
+	oauthState, err := r.Cookie(stateCookieName)
+	if err != nil {
+		log.Println(err.Error())
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
 
 	if r.FormValue("state") != oauthState.Value {
 		log.Println("invalid oauth google state")
@@ -57,10 +54,7 @@ func OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// GetOrCreate User in your db.
-	// Redirect or response with a token.
-	// More code .....
-	// fmt.Fprintf(w, "UserInfo: %+v\n", data)
+	// TODO: do something with user data
 
 	t, err := template.New("foo").Parse(`Hello {{.Email}}, your ID is: {{.ID}}.`)
 	if err != nil {
@@ -74,21 +68,6 @@ func OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-}
-
-func generateStateOauthCookie(w http.ResponseWriter) string {
-	var expiration = time.Now().Add(365 * 24 * time.Hour)
-
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-
-	state := base64.URLEncoding.EncodeToString(b)
-	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expiration}
-	http.SetCookie(w, &cookie)
-
-	return state
 }
 
 func getUserDataFromGoogle(code string) (googleUserData, error) {
