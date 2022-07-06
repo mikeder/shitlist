@@ -20,6 +20,12 @@ $ buf lint
 $ buf generate
 ```
 
+## Building the server
+
+```bash
+$ go build -o ./.bin/shitlist cmd/server/main.go
+```
+
 ## Running the server
 
 ```bash
