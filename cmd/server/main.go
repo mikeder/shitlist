@@ -36,6 +36,10 @@ func main() {
 	// register file handlers
 	mux.Handle("/", http.FileServer(http.Dir("templates/")))
 
+	// OauthGitHub
+	mux.HandleFunc("/auth/github/login", handlers.OauthGithubLogin)
+	mux.HandleFunc("/auth/github/callback", handlers.OauthGithubCallback)
+
 	// OauthGoogle
 	mux.HandleFunc("/auth/google/login", handlers.OauthGoogleLogin)
 	mux.HandleFunc("/auth/google/callback", handlers.OauthGoogleCallback)
