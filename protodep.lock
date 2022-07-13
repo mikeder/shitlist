@@ -1,0 +1,9 @@
+proto_outdir = "./proto"
+
+[[dependencies]]
+  target = "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto"
+  subgroup = ""
+  revision = "758c5fc3a13b71bdb7e851b0c1ee8f6232e0ce7d"
+  branch = ""
+  path = "validate/validate.proto"
+  protocol = ""

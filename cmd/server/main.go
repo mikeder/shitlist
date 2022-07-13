@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/mikeder/shitlist/internal/handlers"
 
@@ -17,7 +18,11 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-type ShitlistServer struct{}
+var clicks = make(map[string]int64)
+
+type ShitlistServer struct {
+	clickMux *sync.Mutex
+}
 
 func (s *ShitlistServer) Greet(
 	ctx context.Context,
@@ -25,6 +30,22 @@ func (s *ShitlistServer) Greet(
 	log.Println("Request headers: ", req.Header())
 	res := connect.NewResponse(&shitlistv1.GreetResponse{
 		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
+	})
+	res.Header().Set("Shitlist-Version", "v1")
+	return res, nil
+}
+
+func (s *ShitlistServer) Click(
+	ctx context.Context,
+	req *connect.Request[shitlistv1.ClickRequest]) (*connect.Response[shitlistv1.ClickResponse], error) {
+	uid := req.Msg.UserId
+
+	s.clickMux.Lock()
+	clicks[uid]++
+	s.clickMux.Unlock()
+
+	res := connect.NewResponse(&shitlistv1.ClickResponse{
+		Clicks: clicks[uid],
 	})
 	res.Header().Set("Shitlist-Version", "v1")
 	return res, nil
@@ -56,7 +77,9 @@ func main() {
 	// x/net/http2 and use http.ListenAndServeTLS instead.
 
 	// register service handlers
-	shitlistsrv := &ShitlistServer{}
+	shitlistsrv := &ShitlistServer{
+		clickMux: new(sync.Mutex),
+	}
 	path, handler := shitlistv1connect.NewShitlistServiceHandler(shitlistsrv)
 	mux.Handle(path, handler)
 

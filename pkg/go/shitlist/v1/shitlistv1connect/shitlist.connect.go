@@ -27,7 +27,10 @@ const (
 
 // ShitlistServiceClient is a client for the shitlist.v1.ShitlistService service.
 type ShitlistServiceClient interface {
+	// Greet performs a greet action.
 	Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error)
+	// Click records a click action by a user.
+	Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error)
 }
 
 // NewShitlistServiceClient constructs a client for the shitlist.v1.ShitlistService service. By
@@ -45,12 +48,18 @@ func NewShitlistServiceClient(httpClient connect_go.HTTPClient, baseURL string, 
 			baseURL+"/shitlist.v1.ShitlistService/Greet",
 			opts...,
 		),
+		click: connect_go.NewClient[v1.ClickRequest, v1.ClickResponse](
+			httpClient,
+			baseURL+"/shitlist.v1.ShitlistService/Click",
+			opts...,
+		),
 	}
 }
 
 // shitlistServiceClient implements ShitlistServiceClient.
 type shitlistServiceClient struct {
 	greet *connect_go.Client[v1.GreetRequest, v1.GreetResponse]
+	click *connect_go.Client[v1.ClickRequest, v1.ClickResponse]
 }
 
 // Greet calls shitlist.v1.ShitlistService.Greet.
@@ -58,9 +67,17 @@ func (c *shitlistServiceClient) Greet(ctx context.Context, req *connect_go.Reque
 	return c.greet.CallUnary(ctx, req)
 }
 
+// Click calls shitlist.v1.ShitlistService.Click.
+func (c *shitlistServiceClient) Click(ctx context.Context, req *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error) {
+	return c.click.CallUnary(ctx, req)
+}
+
 // ShitlistServiceHandler is an implementation of the shitlist.v1.ShitlistService service.
 type ShitlistServiceHandler interface {
+	// Greet performs a greet action.
 	Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error)
+	// Click records a click action by a user.
+	Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error)
 }
 
 // NewShitlistServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -75,6 +92,11 @@ func NewShitlistServiceHandler(svc ShitlistServiceHandler, opts ...connect_go.Ha
 		svc.Greet,
 		opts...,
 	))
+	mux.Handle("/shitlist.v1.ShitlistService/Click", connect_go.NewUnaryHandler(
+		"/shitlist.v1.ShitlistService/Click",
+		svc.Click,
+		opts...,
+	))
 	return "/shitlist.v1.ShitlistService/", mux
 }
 
@@ -83,4 +105,8 @@ type UnimplementedShitlistServiceHandler struct{}
 
 func (UnimplementedShitlistServiceHandler) Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("shitlist.v1.ShitlistService.Greet is not implemented"))
+}
+
+func (UnimplementedShitlistServiceHandler) Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("shitlist.v1.ShitlistService.Click is not implemented"))
 }

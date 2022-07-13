@@ -1,0 +1,24 @@
+# buf.yaml defines a module
+# https://docs.buf.build/configuration/v1/buf-yaml
+version: v1beta1
+build:
+  roots:
+    - proto
+breaking:
+  use:
+    - FILE
+    - PACKAGE
+    - WIRE_JSON
+    - WIRE
+  except:
+    - FIELD_SAME_JSTYPE
+lint:
+  ignore:
+    - google
+    - protoc-gen-openapiv2
+    - protoc-gen-gorm
+    - validate
+  use:
+    - DEFAULT
+    - COMMENTS
+    - OTHER
