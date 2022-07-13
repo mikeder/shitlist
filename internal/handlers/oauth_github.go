@@ -70,7 +70,6 @@ func OauthGithubCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserDataFromGithub(code string) (githubUserData, error) {
-	// Use code to get token and get user info from Google.
 	var userData githubUserData
 
 	token, err := githubOauthConfig.Exchange(context.Background(), code)
