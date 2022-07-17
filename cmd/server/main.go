@@ -27,6 +27,9 @@ type ShitlistServer struct {
 func (s *ShitlistServer) Greet(
 	ctx context.Context,
 	req *connect.Request[shitlistv1.GreetRequest]) (*connect.Response[shitlistv1.GreetResponse], error) {
+	if err := req.Msg.Validate(); err != nil {
+		return nil, err
+	}
 	log.Println("Request headers: ", req.Header())
 	res := connect.NewResponse(&shitlistv1.GreetResponse{
 		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
@@ -38,6 +41,10 @@ func (s *ShitlistServer) Greet(
 func (s *ShitlistServer) Click(
 	ctx context.Context,
 	req *connect.Request[shitlistv1.ClickRequest]) (*connect.Response[shitlistv1.ClickResponse], error) {
+	if err := req.Msg.Validate(); err != nil {
+		return nil, err
+	}
+
 	uid := req.Msg.UserId
 
 	s.clickMux.Lock()

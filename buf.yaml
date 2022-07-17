@@ -1,24 +1,18 @@
 # buf.yaml defines a module
 # https://docs.buf.build/configuration/v1/buf-yaml
-version: v1beta1
+version: v1
+# https://docs.buf.build/tour/add-a-dependency
+deps:
+  - buf.build/envoyproxy/protoc-gen-validate
 build:
-  roots:
-    - proto
+  excludes:
+    - vendor
 breaking:
   use:
     - FILE
-    - PACKAGE
-    - WIRE_JSON
-    - WIRE
-  except:
-    - FIELD_SAME_JSTYPE
 lint:
   ignore:
-    - google
-    - protoc-gen-openapiv2
-    - protoc-gen-gorm
-    - validate
+    - vendor
   use:
     - DEFAULT
     - COMMENTS
-    - OTHER

@@ -1,6 +1,0 @@
-proto_outdir = "./proto"
-
-[[dependencies]]
-	target = "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto"
-	revision = "v0.6.1"
-	path = "validate/validate.proto"

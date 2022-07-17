@@ -10,3 +10,8 @@ plugins:
     out: pkg/go
     opt: 
       - paths=source_relative
+  - name: validate
+    opt:
+      - lang=go
+      - paths=source_relative
+    out: pkg/go
