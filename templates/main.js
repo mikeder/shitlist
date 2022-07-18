@@ -1,4 +1,8 @@
-userID = 'ddc7a2d5-a617-4846-bc06-5bcd58c64091' // TODO: get userID from somewhere
+window.onload = function() {
+    userID = uuidv4()
+    document.getElementById('username').innerText = "UserID: " + userID
+    document.getElementById('score').innerText = "Score: 0"
+};
 
 async function postData(url = '', data = {}) {
     // Default options are marked with *
@@ -24,12 +28,14 @@ async function clickRPC() {
     }
     postData(path, data)
         .then(data => {
-            console.log(data); // JSON data parsed by `data.json()` call
+            document.getElementById('score').innerText = "Score: " + data.clicks
         });
 }
 
 function newUserID() {
     userID = uuidv4();
+    document.getElementById('username').innerText = "UserID: " + userID
+    document.getElementById('score').innerText = "Score: 0"
 }
 
 function uuidv4() {

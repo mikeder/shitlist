@@ -12,14 +12,21 @@
 
 <body>
 
-    <div style="width: auto;">
+    <div style="width: auto; text-align: center;">
         <a href="/auth/github/login">Login via GitHub</a><br>
         <a href="/auth/google/login">Login via Google</a><br>
-        <hr> Click the button!
-        <button onclick="clickRPC()">CLICK</button>
+        <hr>
+        <button class="button" onclick="clickRPC()">Click Me</button>
+        <br>
+        <h4 id="score"></h4>
+        <br>
 
-        <button onclick="newUserID()">New User ID</button>
+        <button class="button" onclick="newUserID()">New User ID</button>
+        <br>
+        <h4 id="username"></h4>
     </div>
+
+    <table id="leaderboard"></table>
 </body>
 
 </html>
