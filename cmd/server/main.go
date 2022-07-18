@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"sync"
 
 	"github.com/mikeder/shitlist/internal/handlers"
@@ -22,6 +23,7 @@ var clicks = make(map[string]int64)
 
 type ShitlistServer struct {
 	clickMux *sync.Mutex
+	version  string
 }
 
 func (s *ShitlistServer) Greet(
@@ -34,7 +36,7 @@ func (s *ShitlistServer) Greet(
 	res := connect.NewResponse(&shitlistv1.GreetResponse{
 		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
 	})
-	res.Header().Set("Shitlist-Version", "v1")
+	res.Header().Set("Shitlist-Version", s.version)
 	return res, nil
 }
 
@@ -54,7 +56,40 @@ func (s *ShitlistServer) Click(
 	res := connect.NewResponse(&shitlistv1.ClickResponse{
 		Clicks: clicks[uid],
 	})
-	res.Header().Set("Shitlist-Version", "v1")
+	res.Header().Set("Shitlist-Version", s.version)
+	return res, nil
+}
+
+func (s *ShitlistServer) Leaders(
+	ctx context.Context,
+	req *connect.Request[shitlistv1.LeadersRequest]) (*connect.Response[shitlistv1.LeadersResponse], error) {
+	if err := req.Msg.Validate(); err != nil {
+		return nil, err
+	}
+
+	var clickers, leaders []*shitlistv1.Clicker
+	// create a slice of clickers
+	for u, c := range clicks {
+		clickers = append(clickers, &shitlistv1.Clicker{
+			UserId: u,
+			Clicks: c,
+		})
+	}
+
+	// sort clickers highest to lowest
+	sort.Slice(clickers, func(i, j int) bool {
+		return clickers[i].Clicks > clickers[j].Clicks
+	})
+
+	numLeaders := 10
+	if len(clickers) < numLeaders {
+		numLeaders = len(clickers)
+	}
+	leaders = clickers[:numLeaders]
+	res := connect.NewResponse(&shitlistv1.LeadersResponse{
+		TopClickers: leaders,
+	})
+	res.Header().Set("Shitlist-Version", s.version)
 	return res, nil
 }
 
@@ -86,7 +121,9 @@ func main() {
 	// register service handlers
 	shitlistsrv := &ShitlistServer{
 		clickMux: new(sync.Mutex),
+		version:  "v1",
 	}
+
 	path, handler := shitlistv1connect.NewShitlistServiceHandler(shitlistsrv)
 	mux.Handle(path, handler)
 

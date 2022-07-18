@@ -1,3 +1,5 @@
+userID = 'ddc7a2d5-a617-4846-bc06-5bcd58c64091' // TODO: get userID from somewhere
+
 async function postData(url = '', data = {}) {
     // Default options are marked with *
     const response = await fetch(url, {
@@ -16,8 +18,6 @@ async function postData(url = '', data = {}) {
 }
 
 async function clickRPC() {
-    userID = 'ddc7a2d5-a617-4846-bc06-5bcd58c64091' // TODO: get userID from somewhere
-
     path = '/shitlist.v1.ShitlistService/Click'
     data = {
         user_id: userID
@@ -26,4 +26,14 @@ async function clickRPC() {
         .then(data => {
             console.log(data); // JSON data parsed by `data.json()` call
         });
+}
+
+function newUserID() {
+    userID = uuidv4();
+}
+
+function uuidv4() {
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
 }

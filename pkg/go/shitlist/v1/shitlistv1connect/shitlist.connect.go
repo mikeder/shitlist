@@ -31,6 +31,8 @@ type ShitlistServiceClient interface {
 	Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error)
 	// Click records a click action by a user.
 	Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error)
+	// Leaders returns the top 10 clickers.
+	Leaders(context.Context, *connect_go.Request[v1.LeadersRequest]) (*connect_go.Response[v1.LeadersResponse], error)
 }
 
 // NewShitlistServiceClient constructs a client for the shitlist.v1.ShitlistService service. By
@@ -53,13 +55,19 @@ func NewShitlistServiceClient(httpClient connect_go.HTTPClient, baseURL string, 
 			baseURL+"/shitlist.v1.ShitlistService/Click",
 			opts...,
 		),
+		leaders: connect_go.NewClient[v1.LeadersRequest, v1.LeadersResponse](
+			httpClient,
+			baseURL+"/shitlist.v1.ShitlistService/Leaders",
+			opts...,
+		),
 	}
 }
 
 // shitlistServiceClient implements ShitlistServiceClient.
 type shitlistServiceClient struct {
-	greet *connect_go.Client[v1.GreetRequest, v1.GreetResponse]
-	click *connect_go.Client[v1.ClickRequest, v1.ClickResponse]
+	greet   *connect_go.Client[v1.GreetRequest, v1.GreetResponse]
+	click   *connect_go.Client[v1.ClickRequest, v1.ClickResponse]
+	leaders *connect_go.Client[v1.LeadersRequest, v1.LeadersResponse]
 }
 
 // Greet calls shitlist.v1.ShitlistService.Greet.
@@ -72,12 +80,19 @@ func (c *shitlistServiceClient) Click(ctx context.Context, req *connect_go.Reque
 	return c.click.CallUnary(ctx, req)
 }
 
+// Leaders calls shitlist.v1.ShitlistService.Leaders.
+func (c *shitlistServiceClient) Leaders(ctx context.Context, req *connect_go.Request[v1.LeadersRequest]) (*connect_go.Response[v1.LeadersResponse], error) {
+	return c.leaders.CallUnary(ctx, req)
+}
+
 // ShitlistServiceHandler is an implementation of the shitlist.v1.ShitlistService service.
 type ShitlistServiceHandler interface {
 	// Greet performs a greet action.
 	Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error)
 	// Click records a click action by a user.
 	Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error)
+	// Leaders returns the top 10 clickers.
+	Leaders(context.Context, *connect_go.Request[v1.LeadersRequest]) (*connect_go.Response[v1.LeadersResponse], error)
 }
 
 // NewShitlistServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -97,6 +112,11 @@ func NewShitlistServiceHandler(svc ShitlistServiceHandler, opts ...connect_go.Ha
 		svc.Click,
 		opts...,
 	))
+	mux.Handle("/shitlist.v1.ShitlistService/Leaders", connect_go.NewUnaryHandler(
+		"/shitlist.v1.ShitlistService/Leaders",
+		svc.Leaders,
+		opts...,
+	))
 	return "/shitlist.v1.ShitlistService/", mux
 }
 
@@ -109,4 +129,8 @@ func (UnimplementedShitlistServiceHandler) Greet(context.Context, *connect_go.Re
 
 func (UnimplementedShitlistServiceHandler) Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("shitlist.v1.ShitlistService.Click is not implemented"))
+}
+
+func (UnimplementedShitlistServiceHandler) Leaders(context.Context, *connect_go.Request[v1.LeadersRequest]) (*connect_go.Response[v1.LeadersResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("shitlist.v1.ShitlistService.Leaders is not implemented"))
 }

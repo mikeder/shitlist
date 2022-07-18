@@ -13,6 +13,9 @@ service ShitlistService {
 
   // Click records a click action by a user.
   rpc Click(ClickRequest) returns (ClickResponse) {}
+
+  // Leaders returns the top 10 clickers.
+  rpc Leaders(LeadersRequest) returns (LeadersResponse){}
 }
 
 // GreetRequest is a request to perform a greeting.
@@ -37,4 +40,22 @@ message ClickRequest {
 message ClickResponse {
   // clicks recorded for the user.
   int64 clicks = 1;
+}
+
+// LeadersRequest is a request for the top clickers.
+message LeadersRequest {}
+
+// Clicker represents a single clicker user.
+message Clicker {
+  // user_id of the user thats clicking.
+  string user_id = 1 [(validate.rules).string.uuid = true];
+
+  // clicks is the number of times the user has clicked.
+  int64 clicks = 2;
+}
+
+// LeadersResponse is the top clickers.
+message LeadersResponse {
+  // top_clickers are the top 10 clicking users.
+  repeated Clicker top_clickers = 1;
 }

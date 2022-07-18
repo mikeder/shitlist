@@ -461,3 +461,357 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ClickResponseValidationError{}
+
+// Validate checks the field values on LeadersRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *LeadersRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on LeadersRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in LeadersRequestMultiError,
+// or nil if none found.
+func (m *LeadersRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *LeadersRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return LeadersRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// LeadersRequestMultiError is an error wrapping multiple validation errors
+// returned by LeadersRequest.ValidateAll() if the designated constraints
+// aren't met.
+type LeadersRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m LeadersRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m LeadersRequestMultiError) AllErrors() []error { return m }
+
+// LeadersRequestValidationError is the validation error returned by
+// LeadersRequest.Validate if the designated constraints aren't met.
+type LeadersRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e LeadersRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e LeadersRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e LeadersRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e LeadersRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e LeadersRequestValidationError) ErrorName() string { return "LeadersRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e LeadersRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sLeadersRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = LeadersRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = LeadersRequestValidationError{}
+
+// Validate checks the field values on Clicker with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Clicker) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Clicker with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in ClickerMultiError, or nil if none found.
+func (m *Clicker) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Clicker) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if err := m._validateUuid(m.GetUserId()); err != nil {
+		err = ClickerValidationError{
+			field:  "UserId",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Clicks
+
+	if len(errors) > 0 {
+		return ClickerMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *Clicker) _validateUuid(uuid string) error {
+	if matched := _shitlist_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// ClickerMultiError is an error wrapping multiple validation errors returned
+// by Clicker.ValidateAll() if the designated constraints aren't met.
+type ClickerMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ClickerMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ClickerMultiError) AllErrors() []error { return m }
+
+// ClickerValidationError is the validation error returned by Clicker.Validate
+// if the designated constraints aren't met.
+type ClickerValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ClickerValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ClickerValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ClickerValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ClickerValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ClickerValidationError) ErrorName() string { return "ClickerValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ClickerValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sClicker.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ClickerValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ClickerValidationError{}
+
+// Validate checks the field values on LeadersResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *LeadersResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on LeadersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// LeadersResponseMultiError, or nil if none found.
+func (m *LeadersResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *LeadersResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetTopClickers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, LeadersResponseValidationError{
+						field:  fmt.Sprintf("TopClickers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, LeadersResponseValidationError{
+						field:  fmt.Sprintf("TopClickers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return LeadersResponseValidationError{
+					field:  fmt.Sprintf("TopClickers[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return LeadersResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// LeadersResponseMultiError is an error wrapping multiple validation errors
+// returned by LeadersResponse.ValidateAll() if the designated constraints
+// aren't met.
+type LeadersResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m LeadersResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m LeadersResponseMultiError) AllErrors() []error { return m }
+
+// LeadersResponseValidationError is the validation error returned by
+// LeadersResponse.Validate if the designated constraints aren't met.
+type LeadersResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e LeadersResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e LeadersResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e LeadersResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e LeadersResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e LeadersResponseValidationError) ErrorName() string { return "LeadersResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e LeadersResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sLeadersResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = LeadersResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = LeadersResponseValidationError{}
