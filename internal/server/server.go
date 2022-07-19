@@ -1,0 +1,61 @@
+package server
+
+import (
+	"net/http"
+	"time"
+
+	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
+	"github.com/mikeder/shitlist/internal/handlers"
+	"github.com/mikeder/shitlist/pkg/go/shitlist/v1/shitlistv1connect"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+)
+
+func Setup(addr string) *http.Server {
+	mux := http.NewServeMux()
+
+	// register file handlers
+	mux.Handle("/", http.FileServer(http.Dir("templates/")))
+
+	// OauthGitHub
+	mux.HandleFunc("/auth/github/login", handlers.OauthGithubLogin)
+	mux.HandleFunc("/auth/github/callback", handlers.OauthGithubCallback)
+
+	// OauthGoogle
+	mux.HandleFunc("/auth/google/login", handlers.OauthGoogleLogin)
+	mux.HandleFunc("/auth/google/callback", handlers.OauthGoogleCallback)
+
+	// register reflection handlers
+	reflector := grpcreflect.NewStaticReflector(
+		"shitlist.v1.ShitlistService",
+	)
+	mux.Handle(grpcreflect.NewHandlerV1(reflector))
+	// Many tools still expect the older version of the server reflection API, so
+	// most servers should mount both handlers.
+	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
+	// If you don't need to support HTTP/2 without TLS (h2c), you can drop
+	// x/net/http2 and use http.ListenAndServeTLS instead.
+
+	// register service handlers
+	shitlistsrv := handlers.NewShitlistService()
+
+	path, handler := shitlistv1connect.NewShitlistServiceHandler(shitlistsrv)
+	mux.Handle(path, handler)
+
+	return &http.Server{
+		Addr: addr,
+		//use h2c so we can server HTTP/2 w/o TLS
+		Handler: h2c.NewHandler(mux, &http2.Server{}),
+		// add some timeouts, somewhat sane values for now.
+		ReadHeaderTimeout: time.Second * 5,
+		ReadTimeout:       time.Second * 10,
+		WriteTimeout:      time.Second * 10,
+		IdleTimeout:       time.Second * 30,
+	}
+
+}
+
+// Start will start the server listen and serve process, it will block.
+func Start(srv *http.Server) error {
+	return srv.ListenAndServe()
+}
