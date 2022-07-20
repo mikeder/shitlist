@@ -13,6 +13,12 @@ $ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 $ go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest
 ```
 
+### Add Go install directories to PATH
+```bash
+$ [ -n "$(go env GOBIN)" ] && export PATH="$(go env GOBIN):${PATH}"
+$ [ -n "$(go env GOPATH)" ] && export PATH="$(go env GOPATH)/bin:${PATH}"
+```
+
 ### Generate code
 
 ```bash

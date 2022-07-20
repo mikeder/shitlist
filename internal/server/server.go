@@ -5,13 +5,14 @@ import (
 	"time"
 
 	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
+	"github.com/mikeder/shitlist/internal/config"
 	"github.com/mikeder/shitlist/internal/handlers"
 	"github.com/mikeder/shitlist/pkg/go/shitlist/v1/shitlistv1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
-func Setup(addr string) *http.Server {
+func Setup(cfg *config.Specification) *http.Server {
 	mux := http.NewServeMux()
 
 	// register file handlers
@@ -43,19 +44,21 @@ func Setup(addr string) *http.Server {
 	mux.Handle(path, handler)
 
 	return &http.Server{
-		Addr: addr,
+		Addr: cfg.ServerListenAddress,
 		//use h2c so we can server HTTP/2 w/o TLS
 		Handler: h2c.NewHandler(mux, &http2.Server{}),
-		// add some timeouts, somewhat sane values for now.
+		// TODO: put timeouts in config if the need to be changed
 		ReadHeaderTimeout: time.Second * 5,
 		ReadTimeout:       time.Second * 10,
 		WriteTimeout:      time.Second * 10,
 		IdleTimeout:       time.Second * 30,
 	}
-
 }
 
 // Start will start the server listen and serve process, it will block.
 func Start(srv *http.Server) error {
-	return srv.ListenAndServe()
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return err
+	}
+	return nil
 }

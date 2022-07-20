@@ -8,11 +8,18 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mikeder/shitlist/internal/config"
 	"github.com/mikeder/shitlist/internal/server"
 )
 
 func main() {
-	srv := server.Setup(":10000")
+	cfg := new(config.Specification)
+	if err := cfg.LoadFromEnvironment(); err != nil {
+		cfg.Usage()
+		log.Fatal(err)
+	}
+
+	srv := server.Setup(cfg)
 
 	go func() {
 		if err := server.Start(srv); err != nil {
@@ -26,7 +33,8 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 
 	// Waiting for signal to shutdown
-	<-stop
+	sig := <-stop
+	log.Println("Shutdown due to " + sig.String())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
