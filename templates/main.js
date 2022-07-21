@@ -2,6 +2,7 @@ window.onload = function() {
     userID = uuidv4()
     document.getElementById('username').innerText = "UserID: " + userID
     document.getElementById('score').innerText = "Score: 0"
+    leadersRPC()
 };
 
 async function postData(url = '', data = {}) {
@@ -30,6 +31,35 @@ async function clickRPC() {
         .then(data => {
             document.getElementById('score').innerText = "Score: " + data.clicks
         });
+}
+
+async function leadersRPC() {
+    path = '/shitlist.v1.ShitlistService/Leaders'
+    data = {}
+    postData(path, data).then(data => { updateLeaders(data) });
+}
+
+function updateLeaders(data = {}) {
+    const leaderBoardID = 'leaderboard'
+    var table = document.createElement('table');
+    table.id = leaderBoardID
+    var header = table.insertRow()
+
+    var userID = header.insertCell()
+    userID.textContent = 'UserID'
+
+    var clicks = header.insertCell()
+    clicks.textContent = 'Clicks'
+
+    data.topClickers.forEach(function(rowData) {
+        var row = table.insertRow()
+        var uid = row.insertCell()
+        var clicks = row.insertCell()
+
+        uid.textContent = rowData.userId
+        clicks.textContent = rowData.clicks
+    });
+    document.getElementById(leaderBoardID).replaceWith(table)
 }
 
 function newUserID() {

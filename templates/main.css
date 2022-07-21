@@ -20,3 +20,9 @@
     background-color: #3e8e41;
     transform: translateY(4px);
 }
+
+table {
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
