@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"sync"
 
+	"github.com/mikeder/shitlist/internal/database"
 	shitlistv1 "github.com/mikeder/shitlist/pkg/go/shitlist/v1"
 	"github.com/mikeder/shitlist/pkg/go/shitlist/v1/shitlistv1connect"
 
@@ -15,18 +15,16 @@ import (
 
 const version = "v1"
 
-var clicks = make(map[string]int64)
-
 func NewShitlistService() shitlistv1connect.ShitlistServiceHandler {
 	return &srv{
-		clickMux: new(sync.Mutex),
-		version:  version,
+		db:      database.NewVolatileClickStore(),
+		version: version,
 	}
 }
 
 type srv struct {
-	clickMux *sync.Mutex
-	version  string
+	db      database.ClickStore
+	version string
 }
 
 func (s *srv) Greet(
@@ -51,13 +49,13 @@ func (s *srv) Click(
 	}
 
 	uid := req.Msg.UserId
-
-	s.clickMux.Lock()
-	clicks[uid]++
-	s.clickMux.Unlock()
+	clicker, err := s.db.AddClick(uid)
+	if err != nil {
+		return nil, err
+	}
 
 	res := connect.NewResponse(&shitlistv1.ClickResponse{
-		Clicks: clicks[uid],
+		Clicks: clicker.ClickCount,
 	})
 	res.Header().Set("Shitlist-Version", s.version)
 	return res, nil
@@ -70,28 +68,36 @@ func (s *srv) Leaders(
 		return nil, err
 	}
 
-	var clickers, leaders []*shitlistv1.Clicker
-	// create a slice of clickers
-	for u, c := range clicks {
-		clickers = append(clickers, &shitlistv1.Clicker{
-			UserId: u,
-			Clicks: c,
-		})
+	clickers, err := s.db.GetClickers()
+	if err != nil {
+		return nil, err
 	}
 
 	// sort clickers highest to lowest
 	sort.Slice(clickers, func(i, j int) bool {
-		return clickers[i].Clicks > clickers[j].Clicks
+		return clickers[i].ClickCount > clickers[j].ClickCount
 	})
 
 	numLeaders := 10
 	if len(clickers) < numLeaders {
 		numLeaders = len(clickers)
 	}
-	leaders = clickers[:numLeaders]
+
 	res := connect.NewResponse(&shitlistv1.LeadersResponse{
-		TopClickers: leaders,
+		TopClickers: dbClickersToProto(clickers[:numLeaders]),
 	})
 	res.Header().Set("Shitlist-Version", s.version)
 	return res, nil
+}
+
+func dbClickersToProto(dbc []database.Clicker) []*shitlistv1.Clicker {
+	var pc []*shitlistv1.Clicker
+	for _, c := range dbc {
+		c := c
+		pc = append(pc, &shitlistv1.Clicker{
+			UserId: c.UserID,
+			Clicks: c.ClickCount,
+		})
+	}
+	return pc
 }
