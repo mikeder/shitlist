@@ -15,7 +15,7 @@ import (
 func main() {
 	cfg := new(config.Specification)
 	if err := cfg.LoadFromEnvironment(); err != nil {
-		cfg.Usage()
+		_ = cfg.Usage()
 		log.Fatal(err)
 	}
 
