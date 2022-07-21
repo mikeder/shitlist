@@ -1,0 +1,9 @@
+services:
+  shitlist:
+    build:
+      context: .
+      target: run
+    env_file: .env
+    restart: always
+    ports:
+      - 10000:10000
