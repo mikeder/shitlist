@@ -16,7 +16,7 @@ func Setup(cfg *config.Specification) *http.Server {
 	mux := http.NewServeMux()
 
 	// register file handlers
-	mux.Handle("/", http.FileServer(http.Dir("templates/")))
+	mux.Handle("/", http.FileServer(http.Dir("../../templates/")))
 
 	// OauthGitHub
 	mux.HandleFunc("/auth/github/login", handlers.OauthGithubLogin)
