@@ -3,13 +3,13 @@ package database
 import "sync"
 
 type VolatileClickStore struct {
-	clickers map[string]int64
+	clickers map[string]uint64
 	m        *sync.Mutex
 }
 
 func NewVolatileClickStore() *VolatileClickStore {
 	return &VolatileClickStore{
-		clickers: make(map[string]int64),
+		clickers: make(map[string]uint64),
 		m:        new(sync.Mutex),
 	}
 }

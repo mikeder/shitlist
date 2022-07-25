@@ -39,7 +39,7 @@ message ClickRequest {
 // ClickResponse is a response to a click event.
 message ClickResponse {
   // clicks recorded for the user.
-  int64 clicks = 1;
+  uint64 clicks = 1;
 }
 
 // LeadersRequest is a request for the top clickers.
@@ -51,7 +51,7 @@ message Clicker {
   string user_id = 1 [(validate.rules).string.uuid = true];
 
   // clicks is the number of times the user has clicked.
-  int64 clicks = 2;
+  uint64 clicks = 2;
 }
 
 // LeadersResponse is the top clickers.

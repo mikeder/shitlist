@@ -2,7 +2,7 @@ package database
 
 type Clicker struct {
 	UserID     string `db:"user_id"`
-	ClickCount int64  `db:"click_count"`
+	ClickCount uint64 `db:"click_count"`
 }
 
 type User struct {
