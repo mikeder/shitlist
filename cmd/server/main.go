@@ -19,7 +19,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	srv := server.Setup(cfg)
+	srv, err := server.Setup(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	go func() {
 		if err := server.Start(srv); err != nil {

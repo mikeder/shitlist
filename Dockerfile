@@ -7,6 +7,7 @@ WORKDIR /src
 COPY . .
 ENV CGO_ENABLED=0
 RUN go build -mod=vendor -o /src/bin/server cmd/server/main.go
+RUN go build -mod=vendor -o /src/bin/migrate cmd/migrate/main.go
 
 FROM scratch as run
 
@@ -15,3 +16,8 @@ COPY --from=builder /src/bin/server /server
 COPY --from=builder /src/templates /templates
 ENTRYPOINT ["/server"]
 EXPOSE 10000
+
+FROM scratch as migrate
+COPY --from=builder /src/bin/migrate /migrate
+COPY --from=builder /src/internal/database/migrations /db/migrations
+ENTRYPOINT [ "/migrate" ]

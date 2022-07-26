@@ -2,11 +2,15 @@ package config
 
 import (
 	"github.com/kelseyhightower/envconfig"
+	"github.com/mikeder/shitlist/internal/database"
 )
 
 const envPrefix = ""
 
 type Specification struct {
+	// Database Config
+	Database database.PersistentClickStoreConfig `required:"true" split_words:"true"`
+
 	// OAuth Configs
 	GithubOauthClientID     string `required:"true" split_words:"true"`
 	GithubOauthClientSecret string `required:"true" split_words:"true"`

@@ -6,6 +6,7 @@ import (
 	"log"
 	"sort"
 
+	"github.com/mikeder/shitlist/internal/config"
 	"github.com/mikeder/shitlist/internal/database"
 	shitlistv1 "github.com/mikeder/shitlist/pkg/go/shitlist/v1"
 	"github.com/mikeder/shitlist/pkg/go/shitlist/v1/shitlistv1connect"
@@ -15,15 +16,21 @@ import (
 
 const version = "v1"
 
-func NewShitlistService() shitlistv1connect.ShitlistServiceHandler {
-	return &srv{
-		db:      database.NewVolatileClickStore(),
-		version: version,
+func NewShitlistService(cfg *config.Specification) (shitlistv1connect.ShitlistServiceHandler, error) {
+	db, err := database.NewPersistentClickStore(cfg.Database)
+	if err != nil {
+		return nil, err
 	}
+	return &srv{
+		cs:      db,
+		us:      db,
+		version: version,
+	}, nil
 }
 
 type srv struct {
-	db      database.ClickStore
+	cs      database.ClickStore
+	us      database.UserStore
 	version string
 }
 
@@ -49,7 +56,7 @@ func (s *srv) Click(
 	}
 
 	uid := req.Msg.UserId
-	clicker, err := s.db.AddClick(uid)
+	clicker, err := s.cs.AddClick(uid)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +75,7 @@ func (s *srv) Leaders(
 		return nil, err
 	}
 
-	clickers, err := s.db.GetClickers()
+	clickers, err := s.cs.GetClickers()
 	if err != nil {
 		return nil, err
 	}

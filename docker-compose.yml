@@ -8,3 +8,25 @@ services:
     restart: always
     ports:
       - 10000:10000
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: shitlist
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secretPW
+
+  migrate:
+    depends_on:
+      - db
+    build:
+      context: .
+      target: migrate
+    restart: on-failure
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

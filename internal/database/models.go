@@ -6,5 +6,7 @@ type Clicker struct {
 }
 
 type User struct {
-	UserID uint `db:"user_id"`
+	ID    string `db:"user_id"`
+	Name  string `db:"user_name"`
+	Email string `db:"user_email"`
 }

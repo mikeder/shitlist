@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-func Setup(cfg *config.Specification) *http.Server {
+func Setup(cfg *config.Specification) (*http.Server, error) {
 	mux := http.NewServeMux()
 
 	// register file handlers
@@ -38,7 +38,10 @@ func Setup(cfg *config.Specification) *http.Server {
 	// x/net/http2 and use http.ListenAndServeTLS instead.
 
 	// register service handlers
-	shitlistsrv := handlers.NewShitlistService()
+	shitlistsrv, err := handlers.NewShitlistService(cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	path, handler := shitlistv1connect.NewShitlistServiceHandler(shitlistsrv)
 	mux.Handle(path, handler)
@@ -52,7 +55,7 @@ func Setup(cfg *config.Specification) *http.Server {
 		ReadTimeout:       time.Second * 10,
 		WriteTimeout:      time.Second * 10,
 		IdleTimeout:       time.Second * 30,
-	}
+	}, nil
 }
 
 // Start will start the server listen and serve process, it will block.
