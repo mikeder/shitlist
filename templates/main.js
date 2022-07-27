@@ -1,9 +1,24 @@
 window.onload = function() {
-    userID = uuidv4()
-    document.getElementById('username').innerText = "UserID: " + userID
-    document.getElementById('score').innerText = "Score: 0"
+    var user_id = getCookie('userID')
+    document.getElementById('username').innerText = "UserID: " + user_id
     leadersRPC()
 };
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
 
 async function postData(url = '', data = {}) {
     // Default options are marked with *
@@ -23,9 +38,13 @@ async function postData(url = '', data = {}) {
 }
 
 async function clickRPC() {
+    var user_id = getCookie('userID')
+    if (user_id === "") {
+        alert("You must login to do that!")
+    }
     path = '/shitlist.v1.ShitlistService/Click'
     data = {
-        user_id: userID
+        user_id: getCookie('userID')
     }
     postData(path, data)
         .then(data => {
@@ -40,6 +59,9 @@ async function leadersRPC() {
 }
 
 function updateLeaders(data = {}) {
+    if (data === {}) return;
+    var user_id = getCookie('userID')
+
     const leaderBoardID = 'leaderboard'
     var table = document.createElement('table');
     table.id = leaderBoardID
@@ -58,18 +80,10 @@ function updateLeaders(data = {}) {
 
         uid.textContent = rowData.userId
         clicks.textContent = rowData.clicks
+
+        if (rowData.userID == user_id) {
+            document.getElementById('score').innerText = "Score: " + rowData.clicks
+        }
     });
     document.getElementById(leaderBoardID).replaceWith(table)
-}
-
-function newUserID() {
-    userID = uuidv4();
-    document.getElementById('username').innerText = "UserID: " + userID
-    document.getElementById('score').innerText = "Score: 0"
-}
-
-function uuidv4() {
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    );
 }
