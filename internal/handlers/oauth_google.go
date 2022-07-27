@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"text/template"
 
 	"golang.org/x/oauth2"
 )
@@ -43,20 +42,20 @@ func (a *API) OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: do something with user data
-
-	t, err := template.New("foo").Parse(`Hello {{.Email}}, your ID is: {{.ID}}.`)
+	// get or create user in database
+	u, err := a.us.GetUserByEmail(data.Email)
 	if err != nil {
-		log.Println(err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
+		log.Println("get user: " + err.Error())
 	}
-	err = t.ExecuteTemplate(w, t.Name(), data)
-	if err != nil {
-		log.Println(err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
+	if u == nil {
+		u, err = a.us.AddUser(data.ID, data.Email)
+		if err != nil {
+			log.Println("add user: " + err.Error())
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		}
 	}
+	setUserIDCookie(w, u.ID)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
 func getUserDataFromGoogle(code string, cfg *oauth2.Config) (googleUserData, error) {

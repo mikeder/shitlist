@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	stateCookieName = "oauthstate"
+	stateCookieName  = "oauthstate"
+	userIDCookieName = "userID"
 )
 
 func setOauthStateCookie(w http.ResponseWriter) string {
@@ -24,4 +25,17 @@ func setOauthStateCookie(w http.ResponseWriter) string {
 	http.SetCookie(w, &cookie)
 
 	return state
+}
+
+func setUserIDCookie(w http.ResponseWriter, userID string) {
+	var expiration = time.Now().Add(365 * 24 * time.Hour)
+	cookie := http.Cookie{
+		Name:     userIDCookieName,
+		Value:    userID,
+		Expires:  expiration,
+		HttpOnly: false, // needs access from main.js
+		Path:     "/",
+		SameSite: http.SameSiteDefaultMode,
+	}
+	http.SetCookie(w, &cookie)
 }
