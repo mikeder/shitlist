@@ -20,6 +20,7 @@ type Specification struct {
 	GoogleOauthRedirectURL  string `default:"http://localhost:10000/auth/google/callback" split_words:"true"`
 
 	// Server Config
+	TemplatesDirectory  string `default:"../../templates" split_words:"true"`
 	ServerListenAddress string `default:":10000" split_words:"true"`
 }
 
