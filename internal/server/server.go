@@ -13,20 +13,26 @@ import (
 )
 
 func Setup(cfg *config.Specification) (*http.Server, error) {
+	// construct API with handlers
+	api, err := handlers.NewAPI(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	mux := http.NewServeMux()
 
-	// register file handlers
+	// register file handlers on mux
 	mux.Handle("/", http.FileServer(http.Dir("../../templates/")))
 
-	// OauthGitHub
-	mux.HandleFunc("/auth/github/login", handlers.OauthGithubLogin)
-	mux.HandleFunc("/auth/github/callback", handlers.OauthGithubCallback)
+	// register GitHub OAuth handlers on mux
+	mux.HandleFunc("/auth/github/login", api.OauthGithubLogin)
+	mux.HandleFunc("/auth/github/callback", api.OauthGithubCallback)
 
-	// OauthGoogle
-	mux.HandleFunc("/auth/google/login", handlers.OauthGoogleLogin)
-	mux.HandleFunc("/auth/google/callback", handlers.OauthGoogleCallback)
+	// register Google OAuth handlers on mux
+	mux.HandleFunc("/auth/google/login", api.OauthGoogleLogin)
+	mux.HandleFunc("/auth/google/callback", api.OauthGoogleCallback)
 
-	// register reflection handlers
+	// register reflection handlers on mux
 	reflector := grpcreflect.NewStaticReflector(
 		"shitlist.v1.ShitlistService",
 	)
@@ -37,18 +43,13 @@ func Setup(cfg *config.Specification) (*http.Server, error) {
 	// If you don't need to support HTTP/2 without TLS (h2c), you can drop
 	// x/net/http2 and use http.ListenAndServeTLS instead.
 
-	// register service handlers
-	shitlistsrv, err := handlers.NewShitlistService(cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	path, handler := shitlistv1connect.NewShitlistServiceHandler(shitlistsrv)
+	// register ShitListService handlers
+	path, handler := shitlistv1connect.NewShitlistServiceHandler(api)
 	mux.Handle(path, handler)
 
 	return &http.Server{
 		Addr: cfg.ServerListenAddress,
-		//use h2c so we can server HTTP/2 w/o TLS
+		// use h2c so we can server HTTP/2 w/o TLS
 		Handler: h2c.NewHandler(mux, &http2.Server{}),
 		// TODO: put timeouts in config if the need to be changed
 		ReadHeaderTimeout: time.Second * 5,

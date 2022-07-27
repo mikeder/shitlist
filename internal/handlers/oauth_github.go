@@ -6,32 +6,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"text/template"
 	"time"
 
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/github"
 )
 
-// Scopes: OAuth 2.0 scopes provide a way to limit the amount of access that is granted to an access token.
-var githubOauthConfig = &oauth2.Config{
-	RedirectURL:  "http://localhost:10000/auth/github/callback",
-	ClientID:     os.Getenv("GITHUB_OAUTH_CLIENT_ID"),
-	ClientSecret: os.Getenv("GITHUB_OAUTH_CLIENT_SECRET"),
-	Scopes:       []string{}, // scopes derived from GitHub App and user permissions.
-	Endpoint:     github.Endpoint,
-}
-
-func OauthGithubLogin(w http.ResponseWriter, r *http.Request) {
+func (a *API) OauthGithubLogin(w http.ResponseWriter, r *http.Request) {
 	// Create oauthState cookie
 	oauthState := setOauthStateCookie(w)
 
-	u := githubOauthConfig.AuthCodeURL(oauthState)
+	u := a.githubOauth.AuthCodeURL(oauthState)
 	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
 }
 
-func OauthGithubCallback(w http.ResponseWriter, r *http.Request) {
+func (a *API) OauthGithubCallback(w http.ResponseWriter, r *http.Request) {
 	// Read oauthState from Cookie
 	oauthState, err := r.Cookie(stateCookieName)
 	if err != nil {
@@ -46,7 +35,7 @@ func OauthGithubCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := getUserDataFromGithub(r.FormValue("code"))
+	data, err := getUserDataFromGithub(r.FormValue("code"), a.githubOauth)
 	if err != nil {
 		log.Println(err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -69,10 +58,10 @@ func OauthGithubCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getUserDataFromGithub(code string) (githubUserData, error) {
+func getUserDataFromGithub(code string, cfg *oauth2.Config) (githubUserData, error) {
 	var userData githubUserData
 
-	token, err := githubOauthConfig.Exchange(context.Background(), code)
+	token, err := cfg.Exchange(context.Background(), code)
 	if err != nil {
 		return userData, fmt.Errorf("code exchange wrong: %s", err.Error())
 	}

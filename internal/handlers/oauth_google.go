@@ -6,33 +6,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"text/template"
 
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 )
-
-// Scopes: OAuth 2.0 scopes provide a way to limit the amount of access that is granted to an access token.
-var googleOauthConfig = &oauth2.Config{
-	RedirectURL:  "http://localhost:10000/auth/google/callback",
-	ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-	ClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
-	Endpoint:     google.Endpoint,
-}
 
 const oauthGoogleUrlAPI = "https://www.googleapis.com/oauth2/v2/userinfo?access_token="
 
-func OauthGoogleLogin(w http.ResponseWriter, r *http.Request) {
+func (a *API) OauthGoogleLogin(w http.ResponseWriter, r *http.Request) {
 	// Create oauthState cookie
 	oauthState := setOauthStateCookie(w)
 
-	u := googleOauthConfig.AuthCodeURL(oauthState)
+	u := a.googleOauth.AuthCodeURL(oauthState)
 	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
 }
 
-func OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
+func (a *API) OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// Read oauthState from Cookie
 	oauthState, err := r.Cookie(stateCookieName)
 	if err != nil {
@@ -47,7 +36,7 @@ func OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := getUserDataFromGoogle(r.FormValue("code"))
+	data, err := getUserDataFromGoogle(r.FormValue("code"), a.googleOauth)
 	if err != nil {
 		log.Println(err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -70,11 +59,11 @@ func OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getUserDataFromGoogle(code string) (googleUserData, error) {
+func getUserDataFromGoogle(code string, cfg *oauth2.Config) (googleUserData, error) {
 	// Use code to get token and get user info from Google.
 	var userData googleUserData
 
-	token, err := googleOauthConfig.Exchange(context.Background(), code)
+	token, err := cfg.Exchange(context.Background(), code)
 	if err != nil {
 		return userData, fmt.Errorf("code exchange wrong: %s", err.Error())
 	}
