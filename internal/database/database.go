@@ -7,5 +7,6 @@ type ClickStore interface {
 
 type UserStore interface {
 	AddUser(name, email string) (User, error)
-	GetUserByEmail(email string) (User, error)
+	GetUserByEmail(userEmail string) (User, error)
+	GetUserByName(userName string) (User, error)
 }

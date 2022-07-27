@@ -9,11 +9,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type PersistentClickStore struct {
+// enforce PersistentDataStore inplements required interfaces
+var _ ClickStore = (*PersistentDataStore)(nil)
+var _ UserStore = (*PersistentDataStore)(nil)
+
+type PersistentDataStore struct {
 	db *sql.DB
 }
 
-type PersistentClickStoreConfig struct {
+type PersistentDataStoreConfig struct {
 	Host       string `required:"true"`
 	Port       int    `default:"5432"`
 	User       string `required:"true"`
@@ -21,7 +25,7 @@ type PersistentClickStoreConfig struct {
 	SchemaName string `required:"true" split_words:"true"`
 }
 
-func NewPersistentClickStore(cfg PersistentClickStoreConfig) (*PersistentClickStore, error) {
+func NewPersistentClickStore(cfg PersistentDataStoreConfig) (*PersistentDataStore, error) {
 	// connection string
 	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.SchemaName)
@@ -37,12 +41,12 @@ func NewPersistentClickStore(cfg PersistentClickStoreConfig) (*PersistentClickSt
 		return nil, err
 	}
 
-	return &PersistentClickStore{
+	return &PersistentDataStore{
 		db: db,
 	}, nil
 }
 
-func (p *PersistentClickStore) AddClick(userID string) (Clicker, error) {
+func (p *PersistentDataStore) AddClick(userID string) (Clicker, error) {
 	var c Clicker
 
 	q := `update "clicks" set "clicks"="clicks"+1 where "user_id"=$1 returning *`
@@ -55,11 +59,11 @@ func (p *PersistentClickStore) AddClick(userID string) (Clicker, error) {
 	return c, nil
 }
 
-func (p *PersistentClickStore) GetClickers() ([]Clicker, error) {
+func (p *PersistentDataStore) GetClickers() ([]Clicker, error) {
 	return []Clicker{}, errors.New("not implemented")
 }
 
-func (p *PersistentClickStore) AddUser(name, email string) (User, error) {
+func (p *PersistentDataStore) AddUser(name, email string) (User, error) {
 	var u User
 	q := `insert into "users"("user_name", "user_email") values($1, $2) returning user_id`
 	err := p.db.QueryRow(q, name, email).Scan(&u)
@@ -70,6 +74,10 @@ func (p *PersistentClickStore) AddUser(name, email string) (User, error) {
 	return u, nil
 }
 
-func (p *PersistentClickStore) GetUserByEmail(email string) (User, error) {
+func (p *PersistentDataStore) GetUserByEmail(email string) (User, error) {
+	return User{}, errors.New("not implemented")
+}
+
+func (p *PersistentDataStore) GetUserByName(name string) (User, error) {
 	return User{}, errors.New("not implemented")
 }

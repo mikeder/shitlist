@@ -9,7 +9,7 @@ const envPrefix = ""
 
 type Specification struct {
 	// Database Config
-	Database database.PersistentClickStoreConfig `required:"true" split_words:"true"`
+	Database database.PersistentDataStoreConfig `required:"true" split_words:"true"`
 
 	// OAuth Configs
 	GithubOauthClientID     string `required:"true" split_words:"true"`
