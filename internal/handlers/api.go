@@ -14,8 +14,8 @@ const version = "v1"
 var _ shitlistv1connect.ShitlistServiceHandler = (*API)(nil)
 
 type API struct {
-	cs database.ClickStore
-	us database.UserStore
+	clickStore database.ClickStore
+	userStore  database.UserStore
 
 	githubOauth *oauth2.Config
 	googleOauth *oauth2.Config
@@ -28,8 +28,8 @@ func NewAPI(cfg *config.Specification) (*API, error) {
 		return nil, err
 	}
 	return &API{
-		cs: db,
-		us: db,
+		clickStore: db,
+		userStore:  db,
 		githubOauth: &oauth2.Config{
 			RedirectURL:  cfg.GithubOauthRedirectURL,
 			ClientID:     cfg.GithubOauthClientID,

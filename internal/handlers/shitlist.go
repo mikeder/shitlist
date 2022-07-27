@@ -34,7 +34,7 @@ func (a *API) Click(
 	}
 
 	uid := req.Msg.UserId
-	clicker, err := a.cs.AddClick(uid)
+	clicker, err := a.clickStore.AddClick(uid)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (a *API) Leaders(
 		return nil, err
 	}
 
-	clickers, err := a.cs.GetClickers()
+	clickers, err := a.clickStore.GetClickers()
 	if err != nil {
 		return nil, err
 	}

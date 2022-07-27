@@ -43,12 +43,12 @@ func (a *API) OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get or create user in database
-	u, err := a.us.GetUserByEmail(data.Email)
+	u, err := a.userStore.GetUserByEmail(data.Email)
 	if err != nil {
 		log.Println("get user: " + err.Error())
 	}
 	if u == nil {
-		u, err = a.us.AddUser(data.ID, data.Email)
+		u, err = a.userStore.AddUser(data.ID, data.Email)
 		if err != nil {
 			log.Println("add user: " + err.Error())
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)

@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -14,6 +16,14 @@ import (
 
 func main() {
 	cfg := new(config.Specification)
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		_ = cfg.Usage()
+	}
+	flag.Parse()
+
 	if err := cfg.LoadFromEnvironment(); err != nil {
 		_ = cfg.Usage()
 		log.Fatal(err)
