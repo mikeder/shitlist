@@ -75,7 +75,7 @@ func (a *API) Leaders(
 	return res, nil
 }
 
-func dbClickersToProto(dbc []database.Clicker) []*shitlistv1.Clicker {
+func dbClickersToProto(dbc []*database.Clicker) []*shitlistv1.Clicker {
 	var pc []*shitlistv1.Clicker
 	for _, c := range dbc {
 		c := c
