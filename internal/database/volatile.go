@@ -21,10 +21,10 @@ func NewVolatileClickStore() *VolatileDataStore {
 	}
 }
 
-func (v *VolatileDataStore) AddClick(userID string) (Clicker, error) {
+func (v *VolatileDataStore) AddClick(userID string) (*Clicker, error) {
 	v.m.Lock()
 	v.clickers[userID]++
-	c := Clicker{
+	c := &Clicker{
 		UserID:     userID,
 		ClickCount: v.clickers[userID],
 	}
@@ -32,10 +32,10 @@ func (v *VolatileDataStore) AddClick(userID string) (Clicker, error) {
 	return c, nil
 }
 
-func (v *VolatileDataStore) GetClickers() ([]Clicker, error) {
-	var c []Clicker
+func (v *VolatileDataStore) GetClickers() ([]*Clicker, error) {
+	var c []*Clicker
 	for k, v := range v.clickers { // Reads without locking because volatile db users don't care
-		c = append(c, Clicker{
+		c = append(c, &Clicker{
 			UserID:     k,
 			ClickCount: v,
 		})
@@ -43,14 +43,14 @@ func (v *VolatileDataStore) GetClickers() ([]Clicker, error) {
 	return c, nil
 }
 
-func (v *VolatileDataStore) AddUser(name, email string) (User, error) {
-	return User{}, errors.New("not implemented")
+func (v *VolatileDataStore) AddUser(name, email string) (*User, error) {
+	return nil, errors.New("not implemented")
 }
 
-func (v *VolatileDataStore) GetUserByEmail(email string) (User, error) {
-	return User{}, errors.New("not implemented")
+func (v *VolatileDataStore) GetUserByEmail(email string) (*User, error) {
+	return nil, errors.New("not implemented")
 }
 
-func (v *VolatileDataStore) GetUserByName(name string) (User, error) {
-	return User{}, errors.New("not implemented")
+func (v *VolatileDataStore) GetUserByName(name string) (*User, error) {
+	return nil, errors.New("not implemented")
 }
