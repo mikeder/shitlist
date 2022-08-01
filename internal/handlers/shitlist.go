@@ -22,7 +22,6 @@ func (a *API) Greet(
 	res := connect.NewResponse(&shitlistv1.GreetResponse{
 		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
 	})
-	res.Header().Set("Shitlist-Version", a.version)
 	return res, nil
 }
 
@@ -42,7 +41,6 @@ func (a *API) Click(
 	res := connect.NewResponse(&shitlistv1.ClickResponse{
 		Clicks: clicker.ClickCount,
 	})
-	res.Header().Set("Shitlist-Version", a.version)
 	return res, nil
 }
 
@@ -71,7 +69,6 @@ func (a *API) Leaders(
 	res := connect.NewResponse(&shitlistv1.LeadersResponse{
 		TopClickers: dbClickersToProto(clickers[:numLeaders]),
 	})
-	res.Header().Set("Shitlist-Version", a.version)
 	return res, nil
 }
 

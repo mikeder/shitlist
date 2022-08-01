@@ -9,17 +9,13 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-const version = "v1"
-
 var _ shitlistv1connect.ShitlistServiceHandler = (*API)(nil)
 
 type API struct {
-	clickStore database.ClickStore
-	userStore  database.UserStore
-
+	clickStore  database.ClickStore
+	userStore   database.UserStore
 	githubOauth *oauth2.Config
 	googleOauth *oauth2.Config
-	version     string
 }
 
 func NewAPI(cfg *config.Specification) (*API, error) {
@@ -44,6 +40,5 @@ func NewAPI(cfg *config.Specification) (*API, error) {
 			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 			Endpoint:     google.Endpoint,
 		},
-		version: version,
 	}, nil
 }
