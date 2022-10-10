@@ -97,7 +97,8 @@ func (p *PersistentDataStore) AddUser(name, email string) (*User, error) {
 	}
 
 	q := `
-INSERT INTO users(user_name, user_email) VALUES($1, $2) returning user_id`
+INSERT INTO users(user_name, user_email) VALUES($1, $2) 
+RETURNING user_id`
 
 	err := p.db.QueryRow(q, name, email).Scan(&u.ID)
 	if err != nil {
@@ -147,14 +148,32 @@ WHERE user_name=$1`
 	return u, nil
 }
 
-func (p *PersistentDataStore) GetUserAuthentications(userID string) (*UserAuthentications, error) {
-	var ua *UserAuthentications = &UserAuthentications{}
+func (p *PersistentDataStore) AddUserAuthentication(userID string, provider AuthenticationProvider) (*Authentication, error) {
+	var ua *Authentication = &Authentication{
+		Provider: provider,
+		UserID:   userID,
+	}
 
 	q := `
-SELECT user_id, user_email, user_name 
-FROM users 
-INNER JOIN authentications 
-ON user_id=fk_authentication_user
+INSERT INTO authentications(authentication_provider, authentication_user_id) 
+VALUES ($1, $2)
+RETURNING authentication_id
+	`
+
+	err := p.db.QueryRow(q, provider, userID).Scan(&ua.ID)
+	if err != nil {
+		return ua, fmt.Errorf("add authentication %v: %w", userID, err)
+	}
+
+	return ua, nil
+}
+
+func (p *PersistentDataStore) GetUserAuthentications(userID string) ([]*Authentication, error) {
+	var ua []*Authentication = []*Authentication{}
+
+	q := `
+SELECT authentication_id, authentication_provider 
+FROM authentications 
 WHERE user_id=$1`
 
 	rows, err := p.db.Query(q, userID)
@@ -166,13 +185,10 @@ WHERE user_id=$1`
 	for rows.Next() {
 		var a Authentication
 		rows.Scan(
-			&ua.User.ID,
-			&ua.User.Email,
-			&ua.User.Name,
 			&a.ID,
 			&a.Provider,
 		)
-		ua.Authentications = append(ua.Authentications, a)
+		ua = append(ua, &a)
 	}
 	return ua, nil
 }
