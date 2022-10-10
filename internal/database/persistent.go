@@ -2,9 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
-	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -51,11 +49,15 @@ func (p *PersistentDataStore) AddClick(userID string) (*Clicker, error) {
 		UserID: userID,
 	}
 
-	q := `update clicks set click_count=click_count+1 where user_id=$1 returning click_count`
+	q := `
+UPDATE clicks 
+SET click_count=click_count+1 
+WHERE user_id=$1 
+RETURNING click_count`
+
 	err := p.db.QueryRow(q, userID).Scan(&c.ClickCount)
 	if err != nil {
-		log.Println("add click: " + err.Error())
-		return nil, errors.New("unable to add click")
+		return nil, fmt.Errorf("add clicker %v: %w", userID, err)
 	}
 
 	return c, nil
@@ -64,25 +66,25 @@ func (p *PersistentDataStore) AddClick(userID string) (*Clicker, error) {
 func (p *PersistentDataStore) GetClickers() ([]*Clicker, error) {
 	var cs []*Clicker = []*Clicker{}
 
-	q := `select user_id, click_count from clicks`
+	q := `
+SELECT user_id, click_count 
+FROM clicks`
+
 	rows, err := p.db.Query(q)
 	if err != nil {
-		log.Println("get clickers: " + err.Error())
-		return nil, errors.New("failed to get clickers")
+		return nil, fmt.Errorf("get clickers: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		c := &Clicker{}
 		if err := rows.Scan(&c.UserID, &c.ClickCount); err != nil {
-			log.Println("scan clicker row: " + err.Error())
-			return nil, errors.New("failed to scan clickers")
+			return nil, fmt.Errorf("scan clicker: %w", err)
 		}
 		cs = append(cs, c)
 	}
 	if err := rows.Err(); err != nil {
-		log.Println("clicker rows err: " + err.Error())
-		return nil, errors.New("failed to iterate clicker rows")
+		return nil, fmt.Errorf("iterate clicker rows: %w", err)
 	}
 
 	return cs, nil
@@ -94,21 +96,23 @@ func (p *PersistentDataStore) AddUser(name, email string) (*User, error) {
 		Email: email,
 	}
 
-	q := `insert into users(user_name, user_email) values($1, $2) returning user_id`
+	q := `
+INSERT INTO users(user_name, user_email) VALUES($1, $2) returning user_id`
+
 	err := p.db.QueryRow(q, name, email).Scan(&u.ID)
 	if err != nil {
-		log.Println("add user: " + err.Error())
-		return nil, errors.New("unable to add user")
+		return nil, fmt.Errorf("add user %v - %v: %w", name, email, err)
 	}
 	return p.addClicker(u)
 }
 
 func (p *PersistentDataStore) addClicker(u *User) (*User, error) {
-	q := `insert into clicks(user_id, click_count) values($1, $2)`
+	q := `
+INSERT INTO clicks(user_id, click_count) VALUES($1, $2)`
+
 	_, err := p.db.Exec(q, u.ID, 0)
 	if err != nil {
-		log.Println("add clicker: " + err.Error())
-		return nil, errors.New("unable to add clicker")
+		return nil, fmt.Errorf("add clicker %v: %w", u.ID, err)
 	}
 	return u, nil
 }
@@ -116,11 +120,14 @@ func (p *PersistentDataStore) addClicker(u *User) (*User, error) {
 func (p *PersistentDataStore) GetUserByEmail(email string) (*User, error) {
 	var u *User = &User{}
 
-	q := `select user_id, user_email, user_name from users where user_email=$1`
+	q := `
+SELECT user_id, user_email, user_name 
+FROM users 
+WHERE user_email=$1`
+
 	err := p.db.QueryRow(q, email).Scan(&u.ID, &u.Email, &u.Name)
 	if err != nil {
-		log.Println("get user by email: " + err.Error())
-		return nil, errors.New("unable to get user by email")
+		return nil, fmt.Errorf("get user by email %v: %w", email, err)
 	}
 	return u, nil
 }
@@ -128,11 +135,14 @@ func (p *PersistentDataStore) GetUserByEmail(email string) (*User, error) {
 func (p *PersistentDataStore) GetUserByName(name string) (*User, error) {
 	var u *User = &User{}
 
-	q := `select user_id, user_email, user_name from users where user_name=$1`
+	q := `
+SELECT user_id, user_email, user_name 
+FROM users 
+WHERE user_name=$1`
+
 	err := p.db.QueryRow(q, name).Scan(&u.ID, &u.Email, &u.Name)
 	if err != nil {
-		log.Println("get user by name: " + err.Error())
-		return nil, errors.New("unable to get user by name")
+		return nil, fmt.Errorf("get user by name %v: %w", name, err)
 	}
 	return u, nil
 }
@@ -145,13 +155,14 @@ SELECT user_id, user_email, user_name
 FROM users 
 INNER JOIN authentications 
 ON user_id=fk_authentication_user
-WHERE user_id=$1
-`
+WHERE user_id=$1`
+
 	rows, err := p.db.Query(q, userID)
 	if err != nil {
 		return ua, fmt.Errorf("get %v authentications: %w", userID, err)
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var a Authentication
 		rows.Scan(
