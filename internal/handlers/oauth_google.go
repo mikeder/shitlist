@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/mikeder/shitlist/internal/database"
 	"golang.org/x/oauth2"
 )
 
@@ -48,11 +49,16 @@ func (a *API) OauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		log.Println("get user: " + err.Error())
 	}
 	if u == nil {
-		u, err = a.userStore.AddUser(data.ID, data.Email)
+		u, err = a.userStore.AddUser(data.Name, data.Email)
 		if err != nil {
 			log.Println("add user: " + err.Error())
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		}
+		ua, err := a.userStore.AddUserAuthentication(u.ID, database.AuthenticationTypeGoogle)
+		if err != nil {
+			log.Println("add user authentication: " + err.Error())
+		}
+		log.Println("added user authentication: " + ua.ID)
 	}
 	setUserIDCookie(w, u.ID)
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -82,6 +88,11 @@ func getUserDataFromGoogle(code string, cfg *oauth2.Config) (googleUserData, err
 type googleUserData struct {
 	ID            string `json:"id"`
 	Email         string `json:"email"`
-	VerifiedEmail bool   `json:"verified_email"`
+	Gender        string `json:"gender"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Locale        string `json:"locale"`
 	Picture       string `json:"picture"`
+	VerifiedEmail bool   `json:"verified_email"`
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/mikeder/shitlist/internal/database"
 	"golang.org/x/oauth2"
 )
 
@@ -52,6 +53,11 @@ func (a *API) OauthGithubCallback(w http.ResponseWriter, r *http.Request) {
 			log.Println("add user: " + err.Error())
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		}
+		ua, err := a.userStore.AddUserAuthentication(u.ID, database.AuthenticationTypeGithub)
+		if err != nil {
+			log.Println("add user authentication: " + err.Error())
+		}
+		log.Println("added user authentication: " + ua.ID)
 	}
 	setUserIDCookie(w, u.ID)
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)

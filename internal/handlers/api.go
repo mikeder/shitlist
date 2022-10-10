@@ -37,8 +37,11 @@ func NewAPI(cfg *config.Specification) (*API, error) {
 			RedirectURL:  cfg.GoogleOauthRedirectURL,
 			ClientID:     cfg.GoogleOauthClientID,
 			ClientSecret: cfg.GoogleOauthClientSecret,
-			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
-			Endpoint:     google.Endpoint,
+			Scopes: []string{
+				"https://www.googleapis.com/auth/userinfo.email",
+				"https://www.googleapis.com/auth/userinfo.profile",
+			},
+			Endpoint: google.Endpoint,
 		},
 	}, nil
 }
