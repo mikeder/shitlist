@@ -136,3 +136,32 @@ func (p *PersistentDataStore) GetUserByName(name string) (*User, error) {
 	}
 	return u, nil
 }
+
+func (p *PersistentDataStore) GetUserAuthentications(userID string) (*UserAuthentications, error) {
+	var ua *UserAuthentications = &UserAuthentications{}
+
+	q := `
+SELECT user_id, user_email, user_name 
+FROM users 
+INNER JOIN authentications 
+ON user_id=fk_authentication_user
+WHERE user_id=$1
+`
+	rows, err := p.db.Query(q, userID)
+	if err != nil {
+		return ua, fmt.Errorf("get %v authentications: %w", userID, err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var a Authentication
+		rows.Scan(
+			&ua.User.ID,
+			&ua.User.Email,
+			&ua.User.Name,
+			&a.ID,
+			&a.Provider,
+		)
+		ua.Authentications = append(ua.Authentications, a)
+	}
+	return ua, nil
+}

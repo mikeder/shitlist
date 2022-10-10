@@ -54,3 +54,7 @@ func (v *VolatileDataStore) GetUserByEmail(email string) (*User, error) {
 func (v *VolatileDataStore) GetUserByName(name string) (*User, error) {
 	return nil, errors.New("not implemented")
 }
+
+func (v *VolatileDataStore) GetUserAuthentications(userID string) (*UserAuthentications, error) {
+	return nil, errors.New("not implemented")
+}

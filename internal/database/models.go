@@ -10,3 +10,20 @@ type User struct {
 	Name  string `db:"user_name"`
 	Email string `db:"user_email"`
 }
+
+type UserAuthentications struct {
+	User            User
+	Authentications []Authentication
+}
+
+type Authentication struct {
+	ID       string                 `db:"authentication_id"`
+	Provider AuthenticationProvider `db:"authentication_provider"`
+}
+
+type AuthenticationProvider string
+
+const (
+	AuthenticationTypeGithub = AuthenticationProvider("github")
+	AuthenticationTypeGoogle = AuthenticationProvider("google")
+)
