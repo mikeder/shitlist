@@ -40,6 +40,9 @@ github.com/kelseyhightower/envconfig
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
+# github.com/rs/cors v1.8.2
+## explicit; go 1.13
+github.com/rs/cors
 # go.uber.org/atomic v1.7.0
 ## explicit; go 1.13
 go.uber.org/atomic

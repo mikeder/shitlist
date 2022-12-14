@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rs/cors"
+
 	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
 	"github.com/mikeder/shitlist/internal/config"
 	"github.com/mikeder/shitlist/internal/handlers"
@@ -47,10 +49,16 @@ func Setup(cfg *config.Specification) (*http.Server, error) {
 	path, handler := shitlistv1connect.NewShitlistServiceHandler(api)
 	mux.Handle(path, handler)
 
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost", "https://click.sqweeb.net"},
+	})
+
+	cw := NewCorsWrapper(c, mux)
+
 	return &http.Server{
 		Addr: cfg.ServerListenAddress,
 		// use h2c so we can server HTTP/2 w/o TLS
-		Handler: h2c.NewHandler(mux, &http2.Server{}),
+		Handler: h2c.NewHandler(cw, &http2.Server{}),
 		// TODO: put timeouts in config if the need to be changed
 		ReadHeaderTimeout: time.Second * 5,
 		ReadTimeout:       time.Second * 10,
@@ -65,4 +73,16 @@ func Start(srv *http.Server) error {
 		return err
 	}
 	return nil
+}
+
+type CorsWrapper struct {
+	h http.Handler
+}
+
+func (cw *CorsWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	cw.h.ServeHTTP(w, r)
+}
+
+func NewCorsWrapper(c *cors.Cors, h http.Handler) *CorsWrapper {
+	return &CorsWrapper{c.Handler(h)}
 }
