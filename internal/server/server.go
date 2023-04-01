@@ -50,7 +50,7 @@ func Setup(cfg *config.Specification) (*http.Server, error) {
 	mux.Handle(path, handler)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost", "https://click.sqweeb.net"},
+		AllowedOrigins: cfg.CorsAllowedDomains,
 	})
 
 	cw := NewCorsWrapper(c, mux)
@@ -59,7 +59,7 @@ func Setup(cfg *config.Specification) (*http.Server, error) {
 		Addr: cfg.ServerListenAddress,
 		// use h2c so we can server HTTP/2 w/o TLS
 		Handler: h2c.NewHandler(cw, &http2.Server{}),
-		// TODO: put timeouts in config if the need to be changed
+		// TODO: put timeouts in config if they need to be changed
 		ReadHeaderTimeout: time.Second * 5,
 		ReadTimeout:       time.Second * 10,
 		WriteTimeout:      time.Second * 10,
