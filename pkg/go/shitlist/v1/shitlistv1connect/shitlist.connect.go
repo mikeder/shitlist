@@ -25,10 +25,22 @@ const (
 	ShitlistServiceName = "shitlist.v1.ShitlistService"
 )
 
+// These constants are the fully-qualified names of the RPCs defined in this package. They're
+// exposed at runtime as Spec.Procedure and as the final two segments of the HTTP route.
+//
+// Note that these are different from the fully-qualified method names used by
+// google.golang.org/protobuf/reflect/protoreflect. To convert from these constants to
+// reflection-formatted method names, remove the leading slash and convert the remaining slash to a
+// period.
+const (
+	// ShitlistServiceClickProcedure is the fully-qualified name of the ShitlistService's Click RPC.
+	ShitlistServiceClickProcedure = "/shitlist.v1.ShitlistService/Click"
+	// ShitlistServiceLeadersProcedure is the fully-qualified name of the ShitlistService's Leaders RPC.
+	ShitlistServiceLeadersProcedure = "/shitlist.v1.ShitlistService/Leaders"
+)
+
 // ShitlistServiceClient is a client for the shitlist.v1.ShitlistService service.
 type ShitlistServiceClient interface {
-	// Greet performs a greet action.
-	Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error)
 	// Click records a click action by a user.
 	Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error)
 	// Leaders returns the top 10 clickers.
@@ -45,19 +57,14 @@ type ShitlistServiceClient interface {
 func NewShitlistServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) ShitlistServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &shitlistServiceClient{
-		greet: connect_go.NewClient[v1.GreetRequest, v1.GreetResponse](
-			httpClient,
-			baseURL+"/shitlist.v1.ShitlistService/Greet",
-			opts...,
-		),
 		click: connect_go.NewClient[v1.ClickRequest, v1.ClickResponse](
 			httpClient,
-			baseURL+"/shitlist.v1.ShitlistService/Click",
+			baseURL+ShitlistServiceClickProcedure,
 			opts...,
 		),
 		leaders: connect_go.NewClient[v1.LeadersRequest, v1.LeadersResponse](
 			httpClient,
-			baseURL+"/shitlist.v1.ShitlistService/Leaders",
+			baseURL+ShitlistServiceLeadersProcedure,
 			opts...,
 		),
 	}
@@ -65,14 +72,8 @@ func NewShitlistServiceClient(httpClient connect_go.HTTPClient, baseURL string, 
 
 // shitlistServiceClient implements ShitlistServiceClient.
 type shitlistServiceClient struct {
-	greet   *connect_go.Client[v1.GreetRequest, v1.GreetResponse]
 	click   *connect_go.Client[v1.ClickRequest, v1.ClickResponse]
 	leaders *connect_go.Client[v1.LeadersRequest, v1.LeadersResponse]
-}
-
-// Greet calls shitlist.v1.ShitlistService.Greet.
-func (c *shitlistServiceClient) Greet(ctx context.Context, req *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error) {
-	return c.greet.CallUnary(ctx, req)
 }
 
 // Click calls shitlist.v1.ShitlistService.Click.
@@ -87,8 +88,6 @@ func (c *shitlistServiceClient) Leaders(ctx context.Context, req *connect_go.Req
 
 // ShitlistServiceHandler is an implementation of the shitlist.v1.ShitlistService service.
 type ShitlistServiceHandler interface {
-	// Greet performs a greet action.
-	Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error)
 	// Click records a click action by a user.
 	Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error)
 	// Leaders returns the top 10 clickers.
@@ -101,31 +100,30 @@ type ShitlistServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewShitlistServiceHandler(svc ShitlistServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	mux := http.NewServeMux()
-	mux.Handle("/shitlist.v1.ShitlistService/Greet", connect_go.NewUnaryHandler(
-		"/shitlist.v1.ShitlistService/Greet",
-		svc.Greet,
-		opts...,
-	))
-	mux.Handle("/shitlist.v1.ShitlistService/Click", connect_go.NewUnaryHandler(
-		"/shitlist.v1.ShitlistService/Click",
+	shitlistServiceClickHandler := connect_go.NewUnaryHandler(
+		ShitlistServiceClickProcedure,
 		svc.Click,
 		opts...,
-	))
-	mux.Handle("/shitlist.v1.ShitlistService/Leaders", connect_go.NewUnaryHandler(
-		"/shitlist.v1.ShitlistService/Leaders",
+	)
+	shitlistServiceLeadersHandler := connect_go.NewUnaryHandler(
+		ShitlistServiceLeadersProcedure,
 		svc.Leaders,
 		opts...,
-	))
-	return "/shitlist.v1.ShitlistService/", mux
+	)
+	return "/shitlist.v1.ShitlistService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case ShitlistServiceClickProcedure:
+			shitlistServiceClickHandler.ServeHTTP(w, r)
+		case ShitlistServiceLeadersProcedure:
+			shitlistServiceLeadersHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
 }
 
 // UnimplementedShitlistServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedShitlistServiceHandler struct{}
-
-func (UnimplementedShitlistServiceHandler) Greet(context.Context, *connect_go.Request[v1.GreetRequest]) (*connect_go.Response[v1.GreetResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("shitlist.v1.ShitlistService.Greet is not implemented"))
-}
 
 func (UnimplementedShitlistServiceHandler) Click(context.Context, *connect_go.Request[v1.ClickRequest]) (*connect_go.Response[v1.ClickResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("shitlist.v1.ShitlistService.Click is not implemented"))

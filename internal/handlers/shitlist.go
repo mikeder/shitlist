@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"sort"
 
 	"github.com/mikeder/shitlist/internal/database"
@@ -11,19 +9,6 @@ import (
 
 	"github.com/bufbuild/connect-go"
 )
-
-func (a *API) Greet(
-	ctx context.Context,
-	req *connect.Request[shitlistv1.GreetRequest]) (*connect.Response[shitlistv1.GreetResponse], error) {
-	if err := req.Msg.Validate(); err != nil {
-		return nil, err
-	}
-	log.Println("Request headers: ", req.Header())
-	res := connect.NewResponse(&shitlistv1.GreetResponse{
-		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
-	})
-	return res, nil
-}
 
 func (a *API) Click(
 	ctx context.Context,

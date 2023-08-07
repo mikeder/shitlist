@@ -35,9 +35,8 @@ func Setup(cfg *config.Specification) (*http.Server, error) {
 	mux.HandleFunc("/auth/google/callback", api.OauthGoogleCallback)
 
 	// register reflection handlers on mux
-	reflector := grpcreflect.NewStaticReflector(
-		"shitlist.v1.ShitlistService",
-	)
+	reflector := grpcreflect.NewStaticReflector(shitlistv1connect.ShitlistServiceName)
+
 	mux.Handle(grpcreflect.NewHandlerV1(reflector))
 	// Many tools still expect the older version of the server reflection API, so
 	// most servers should mount both handlers.

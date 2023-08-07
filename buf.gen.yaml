@@ -2,16 +2,21 @@
 # https://docs.buf.build/configuration/v1/buf-gen-yaml
 version: v1
 plugins:
-  - name: go
+  - plugin: buf.build/protocolbuffers/go:v1.31.0
     out: pkg/go
-    opt: 
-      - paths=source_relative
-  - name: connect-go
-    out: pkg/go
-    opt: 
-      - paths=source_relative
-  - name: validate
     opt:
-      - lang=go
+      - paths=source_relative
+  - plugin: buf.build/bufbuild/connect-go:v1.9.0
+    out: pkg/go
+    opt:
+      - paths=source_relative
+  - plugin: buf.build/bufbuild/validate-go:v1.0.2
+    opt:
       - paths=source_relative
     out: pkg/go
+  - plugin: buf.build/grpc-ecosystem/openapiv2:v2.16.0
+    out: pkg/openapiv2
+  - plugin: buf.build/bufbuild/es:v1.2.1
+    out: pkg/web
+  - plugin: buf.build/bufbuild/connect-es:v0.10.1
+    out: pkg/web

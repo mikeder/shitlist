@@ -6,17 +6,16 @@ Shitlist is a project service that makes use of several technologies I've wanted
 
 ### Install dependencies
 
-```bash
-$ go install github.com/bufbuild/buf/cmd/buf@latest
-$ go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
-$ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-$ go install github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go@latest
-```
+In order to generate client and server stubs from our proto, install the `buf` CLI.
+* https://buf.build/docs/installation
 
-### Add Go install directories to PATH
+This project uses Buf remote plugins, so we no longer need to install the `protoc` compiler plugins.
+
+### Initialize Buf Module
+
 ```bash
-$ [ -n "$(go env GOBIN)" ] && export PATH="$(go env GOBIN):${PATH}"
-$ [ -n "$(go env GOPATH)" ] && export PATH="$(go env GOPATH)/bin:${PATH}"
+proto$ buf mod init
+proto$ buf mod update
 ```
 
 ### Generate code
