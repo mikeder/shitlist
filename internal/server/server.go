@@ -50,6 +50,9 @@ func Setup(cfg *config.Specification) (*http.Server, error) {
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: cfg.CorsAllowedDomains,
+		AllowedHeaders: []string{
+			"Connect-Protocol-Version",
+		},
 	})
 
 	cw := NewCorsWrapper(c, mux)
