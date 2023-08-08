@@ -1,0 +1,89 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "shitlist/v1/shitlist.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "ShitlistService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1ClickResponse": {
+      "type": "object",
+      "properties": {
+        "clicks": {
+          "type": "string",
+          "format": "uint64",
+          "description": "clicks recorded for the user."
+        }
+      },
+      "description": "ClickResponse is a response to a click event."
+    },
+    "v1Clicker": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "user_id of the user thats clicking."
+        },
+        "clicks": {
+          "type": "string",
+          "format": "uint64",
+          "description": "clicks is the number of times the user has clicked."
+        }
+      },
+      "description": "Clicker represents a single clicker user."
+    },
+    "v1LeadersResponse": {
+      "type": "object",
+      "properties": {
+        "topClickers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Clicker"
+          },
+          "description": "top_clickers are the top 10 clicking users."
+        }
+      },
+      "description": "LeadersResponse is the top clickers."
+    }
+  }
+}

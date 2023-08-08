@@ -1,0 +1,24 @@
+{
+  "name": "@mikeder/shitlist",
+  "version": "1.0.0",
+  "description": "Shitlist is a project service that makes use of several technologies I've wanted to try out.",
+  "main": "index.js",
+  "directories": {
+    "lib": "pkg/web"
+  },
+  "files": [
+    "pkg/web"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikeder/shitlist.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "author": "Mike Eder",
+  "license": "UNLICENSED"
+}
